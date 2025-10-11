@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Supabase JS se carga al final del body -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dirección Gestión Educativa — Expedientes</title>
+  <style>
+    @media (max-width: 900px) {
+      main {
+        padding: 0 0.5rem;
+      }
+      .contadores {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      .contadores {
+        grid-template-columns: 1fr;
+      }
+      .contador {
+        padding: 1rem;
+        font-size: 0.95rem;
+      }
+      header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.7rem 0.5rem;
+        text-align: center;
+      }
+      .filtros-responsive {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.7rem !important;
+      }
+      .filtros-responsive > div {
+        width: 100%;
+      }
+      #tabla-principal th, #tabla-principal td {
+        padding: 0.5rem;
+        font-size: 0.95rem;
+      }
+      #tabla-principal {
+        font-size: 0.95rem;
+      }
+    }
+    :root {
+      --celeste-institucional: #56B4C6;
+      --azul-institucional: #1B2A41;
+      --blanco: #fff;
+      --gris-claro-1: #e0f7fa;
+      --gris-claro-2: #e5e7eb;
+      --gris-claro-3: #b2ebf2;
+      --rojo: #dc2626;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    body {
+      background: var(--gris-claro-1);
+      color: var(--azul-institucional);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      width: 100%;
+      background: var(--azul-institucional);
+      color: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    header img {
+      height: 33px;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    main {
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 5.5rem;
+      padding: 0 1rem;
+    }
+    .contadores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .contador {
+      background: var(--celeste-institucional);
+      color: var(--azul-institucional);
+      border-radius: 14px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .contador h3 {
+      font-size: 1rem;
+      color: var(--azul-institucional);
+      margin-bottom: 0.5rem;
+    }
+    .contador span {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--blanco);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--azul-institucional);
+    }
+    thead {
+      background: var(--azul-institucional);
+      color: var(--blanco);
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gris-claro-2);
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    tbody tr:nth-child(even) {
+      background: #f3f4f6;
+    }
+    tbody tr:nth-child(odd) {
+      background: #fff;
+    }
+    tbody tr:hover {
+      background: var(--gris-claro-3);
+    }
+    .estado {
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      color: var(--blanco);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .pendiente {
+  background: var(--rojo);
+  color: var(--blanco);
+    }
+    .proceso {
+  background: var(--azul-institucional);
+  color: var(--blanco);
+    }
+    .observado {
+  background: #f59e42;
+  color: var(--blanco);
+    }
+    .finalizado {
+  background: #16a34a;
+  color: var(--blanco);
+    }
+    button.editar {
+      background: var(--celeste-institucional);
+      border: none;
+      color: var(--azul-institucional);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button.editar:hover {
+      background: #7ed2df;
+    }
+    button.cerrar {
+      background: var(--rojo);
+      color: var(--blanco);
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button.cerrar:hover {
+      background: #b91c1c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+  <img src="LOGO - MINISTERIO_032459.png" alt="Logo Ministerio de Educación San Luis" />
+    <h1>Dirección Gestión Educativa</h1>
+  </header>
+  <main>
+    <div class="contadores">
+    <div class="contador"><h3>Total</h3><span id="contador-total">0</span></div>
+    <div class="contador"><h3>Pendientes</h3><span id="contador-pendientes">0</span></div>
+    <div class="contador"><h3>En Proceso</h3><span id="contador-proceso">0</span></div>
+    <div class="contador"><h3>Observados</h3><span id="contador-observados">0</span></div>
+    <div class="contador"><h3>Finalizados</h3><span id="contador-finalizados">0</span></div>
+    </div>
+  <div class="filtros-responsive" style="background: var(--blanco); border: 1.5px solid var(--gris-claro-2); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; justify-content: space-between;">
+      <div style="display:flex;align-items:center;gap:1rem;flex:1;">
+        <button style="background: var(--azul-institucional); color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.3s;" onclick="abrirModalNuevo()">+ Agregar nuevo</button>
+        <span style="position:relative; display:inline-block; flex:1;">
+          <input id="buscador" type="text" placeholder="Buscar..." style="padding:0.6rem 2.5rem 0.6rem 2.5rem; border-radius:8px; border:1px solid var(--gris-claro-2); font-size:1rem; width:100%; min-width:0; background:#f3f4f6;">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); fill:#9ca3af; pointer-events:none;">
+            <circle cx="11" cy="11" r="7" stroke="#9ca3af" stroke-width="2" fill="none"/>
+            <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <div>
+        <label for="filtro-estado" style="font-weight: 600; color: var(--azul-institucional); margin-right: 0.5rem;">Filtrar por estado:</label>
+        <select id="filtro-estado" style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--gris); font-size: 1rem;">
+          <option value="">Todos</option>
+          <option value="PENDIENTE">Pendientes</option>
+          <option value="PROCESO">En Proceso</option>
+          <option value="OBSERVADO">Observados</option>
+          <option value="FINALIZADO">Finalizados</option>
+        </select>
+      </div>
+    </div>
+    <!-- Modal para nuevo expediente -->
+    <div id="modal-nuevo" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(27,42,65,0.4); z-index:1000; align-items:center; justify-content:center;">
+      <div style="background:white; border-radius:12px; padding:2rem; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
+        <button onclick="cerrarModalNuevo()" class="cerrar" style="position:absolute; top:1rem; right:1rem;">&times;</button>
+  <img src="LOGO NUEVO COLOR_122003.png" alt="Logo" style="display:block; margin:0 auto 1rem auto; height:26px;">
+        <h2 style="color:var(--azul-institucional); margin-bottom:1rem; text-align:center;">Nuevo Expediente</h2>
+        <form id="form-nuevo-expediente" style="width:100%; max-width:350px;">
+          <div style="margin-bottom:1rem;">
+            <label>Expediente<br><input name="expediente" required style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label>Establecimiento<br><input name="establecimiento" required style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label>Observación<br><input name="observacion" style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label>Estado<br>
+              <select name="estado" required style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);">
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="PROCESO">En Proceso</option>
+                <option value="OBSERVADO">Observado</option>
+                <option value="FINALIZADO">Finalizado</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit" class="editar" style="width:100%;">Guardar</button>
+        </form>
+        <div id="nuevo-error" style="color:var(--rojo);margin-top:1rem;"></div>
+      </div>
+    </div>
+  <!-- Filtro duplicado eliminado -->
+    </div>
+    <table id="tabla-principal">
+      <thead>
+        <tr>
+          <th>Expediente</th>
+          <th>Establecimiento</th>
+          <th>Observación</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-principal-body"></tbody>
+    </table>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Modal nuevo expediente
+    function abrirModalNuevo() {
+      document.getElementById('modal-nuevo').style.display = 'flex';
+      document.getElementById('nuevo-error').textContent = '';
+      document.getElementById('form-nuevo-expediente').reset();
+    }
+    function cerrarModalNuevo() {
+      document.getElementById('modal-nuevo').style.display = 'none';
+    }
+    // Inicializa Supabase
+    const supabaseUrl = 'https://csbcfhwdpstnofvsfqwh.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzYmNmaHdkcHN0bm9mdnNmcXdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMjkzODcsImV4cCI6MjA3MTcwNTM4N30.lX166U64tFeqKd6snFduL-oXWD_LXwzPMyQYVF3g8ek';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Mostrar datos en la tabla principal
+  let datosGlobales = [];
+    async function cargarDatos() {
+      const { data, error } = await supabase.from('creaciones').select('*');
+      if (error) {
+        document.getElementById('tabla-principal-body').innerHTML = `<tr><td colspan='5'>Error al cargar datos: ${error.message}</td></tr>`;
+        return;
+      }
+      datosGlobales = data || [];
+      renderizarTabla(datosGlobales);
+      actualizarContadores(datosGlobales);
+    }
+
+    let filaEditando = null;
+    let textoBusqueda = '';
+    function renderizarTabla(datos) {
+      // Filtrar por texto si hay búsqueda
+      let datosFiltrados = datos;
+      if (textoBusqueda.trim() !== '') {
+        const t = textoBusqueda.trim().toLowerCase();
+        datosFiltrados = datos.filter(row =>
+          (row.expediente || '').toLowerCase().includes(t) ||
+          (row.establecimiento || '').toLowerCase().includes(t) ||
+          (row.observacion || '').toLowerCase().includes(t)
+        );
+      }
+      const tbody = document.getElementById('tabla-principal-body');
+      if (!datosFiltrados || datosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan='5'>No hay datos en la tabla.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = datosFiltrados.map(row => {
+    // Buscador
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('buscador').addEventListener('input', function() {
+        textoBusqueda = this.value;
+        renderizarTabla(datosGlobales);
+      });
+    });
+        if (filaEditando === row.id) {
+          // Fila en modo edición
+          return `
+            <tr>
+              <td><input value="${row.expediente || ''}" id="edit-expediente" style="width:100%"></td>
+              <td><input value="${row.establecimiento || ''}" id="edit-establecimiento" style="width:100%"></td>
+              <td><input value="${row.observacion || ''}" id="edit-observacion" style="width:100%"></td>
+              <td>
+                <select id="edit-estado" style="width:100%">
+                  <option value="PENDIENTE" ${row.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
+                  <option value="PROCESO" ${row.estado === 'PROCESO' ? 'selected' : ''}>En Proceso</option>
+                  <option value="OBSERVADO" ${row.estado === 'OBSERVADO' ? 'selected' : ''}>Observado</option>
+                  <option value="FINALIZADO" ${row.estado === 'FINALIZADO' ? 'selected' : ''}>Finalizado</option>
+                </select>
+              </td>
+              <td>
+                <button class="editar" onclick="guardarEdicion(${row.id})">Guardar</button>
+                <button class="cerrar" onclick="cancelarEdicion()">Cancelar</button>
+              </td>
+            </tr>
+          `;
+        } else {
+          let estado = (row.estado || '').toUpperCase();
+          let clase = '';
+          if (estado === 'PENDIENTE') clase = 'estado pendiente';
+          else if (estado === 'PROCESO' || estado === 'EN PROCESO') clase = 'estado proceso';
+          else if (estado === 'OBSERVADO') clase = 'estado observado';
+          else if (estado === 'FINALIZADO') clase = 'estado finalizado';
+          return `
+            <tr>
+              <td>${row.expediente || ''}</td>
+              <td>${row.establecimiento || ''}</td>
+              <td>${row.observacion || ''}</td>
+              <td><span class="${clase}">${row.estado || ''}</span></td>
+              <td><button class="editar" onclick="editarFila(${row.id})">Editar</button></td>
+            </tr>
+          `;
+        }
+      }).join('');
+    }
+
+    function actualizarContadores(datos) {
+      document.getElementById('contador-total').textContent = datos.length;
+      document.getElementById('contador-pendientes').textContent = datos.filter(r => (r.estado || '').toUpperCase() === 'PENDIENTE').length;
+      document.getElementById('contador-proceso').textContent = datos.filter(r => (r.estado || '').toUpperCase() === 'PROCESO').length;
+      document.getElementById('contador-observados').textContent = datos.filter(r => (r.estado || '').toUpperCase() === 'OBSERVADO').length;
+      document.getElementById('contador-finalizados').textContent = datos.filter(r => (r.estado || '').toUpperCase() === 'FINALIZADO').length;
+    }
+
+    document.getElementById('filtro-estado').addEventListener('change', function() {
+      const valor = this.value.toUpperCase();
+      if (!valor) {
+        renderizarTabla(datosGlobales);
+        actualizarContadores(datosGlobales);
+      } else {
+        const filtrados = datosGlobales.filter(r => (r.estado || '').toUpperCase() === valor);
+        renderizarTabla(filtrados);
+        actualizarContadores(filtrados);
+      }
+    });
+
+    // Función placeholder para editar
+    window.editarFila = function(id) {
+      filaEditando = id;
+      renderizarTabla(datosGlobales);
+    }
+
+    window.cancelarEdicion = function() {
+      filaEditando = null;
+      renderizarTabla(datosGlobales);
+    }
+
+    window.guardarEdicion = async function(id) {
+      const expediente = document.getElementById('edit-expediente').value;
+      const establecimiento = document.getElementById('edit-establecimiento').value;
+      const observacion = document.getElementById('edit-observacion').value;
+      const estado = document.getElementById('edit-estado').value;
+      const { error } = await supabase.from('creaciones').update({
+        expediente, establecimiento, observacion, estado
+      }).eq('id', id);
+      filaEditando = null;
+      cargarDatos();
+    }
+
+    // Manejar submit del formulario nuevo expediente
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('form-nuevo-expediente').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const values = Object.fromEntries(new FormData(form));
+        // Insertar en Supabase
+        const { error } = await supabase.from('creaciones').insert([values]);
+        if (error) {
+          document.getElementById('nuevo-error').textContent = 'Error: ' + error.message;
+        } else {
+          cerrarModalNuevo();
+          cargarDatos();
+        }
+      });
+    });
+    cargarDatos();
+  </script>
+</main>
+  <footer style="width:100%;background:var(--celeste-institucional);color:var(--azul-institucional);text-align:center;padding:1.2rem 0;font-size:1rem;font-weight:500; margin-top:2rem;">
+    © 2025 Dirección Gestión Educativa. Ministerio de Educación de la Provincia de San Luis.
+  </footer>
+</body>
+</html>
