@@ -254,6 +254,9 @@
             <label>Establecimiento<br><input name="establecimiento" required style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
           </div>
           <div style="margin-bottom:1rem;">
+  <label>Trámite<br><input name="trámite" required style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
+</div>
+          <div style="margin-bottom:1rem;">
             <label>Observación<br><input name="observacion" style="width:100%;padding:0.5rem; border-radius:6px; border:1px solid var(--gris-claro-2);"></label>
           </div>
           <div style="margin-bottom:1rem;">
@@ -275,14 +278,15 @@
     </div>
     <table id="tabla-principal">
       <thead>
-        <tr>
-          <th>Expediente</th>
-          <th>Establecimiento</th>
-          <th>Observación</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>Expediente</th>
+    <th>Establecimiento</th>
+    <th>Trámite</th>
+    <th>Observación</th>
+    <th>Estado</th>
+    <th>Acciones</th>
+  </tr>
+</thead>
       <tbody id="tabla-principal-body"></tbody>
     </table>
   </main>
@@ -346,20 +350,21 @@
           return `
             <tr>
               <td><input value="${row.expediente || ''}" id="edit-expediente" style="width:100%"></td>
-              <td><input value="${row.establecimiento || ''}" id="edit-establecimiento" style="width:100%"></td>
-              <td><input value="${row.observacion || ''}" id="edit-observacion" style="width:100%"></td>
-              <td>
-                <select id="edit-estado" style="width:100%">
-                  <option value="PENDIENTE" ${row.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
-                  <option value="PROCESO" ${row.estado === 'PROCESO' ? 'selected' : ''}>En Proceso</option>
-                  <option value="OBSERVADO" ${row.estado === 'OBSERVADO' ? 'selected' : ''}>Observado</option>
-                  <option value="FINALIZADO" ${row.estado === 'FINALIZADO' ? 'selected' : ''}>Finalizado</option>
-                </select>
-              </td>
-              <td>
-                <button class="editar" onclick="guardarEdicion(${row.id})">Guardar</button>
-                <button class="cerrar" onclick="cancelarEdicion()">Cancelar</button>
-              </td>
+<td><input value="${row.establecimiento || ''}" id="edit-establecimiento" style="width:100%"></td>
+<td><input value="${row.trámite || ''}" id="edit-trámite" style="width:100%"></td>
+<td><input value="${row.observacion || ''}" id="edit-observacion" style="width:100%"></td>
+<td>
+  <select id="edit-estado" style="width:100%">
+    <option value="PENDIENTE" ${row.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
+    <option value="PROCESO" ${row.estado === 'PROCESO' ? 'selected' : ''}>En Proceso</option>
+    <option value="OBSERVADO" ${row.estado === 'OBSERVADO' ? 'selected' : ''}>Observado</option>
+    <option value="FINALIZADO" ${row.estado === 'FINALIZADO' ? 'selected' : ''}>Finalizado</option>
+  </select>
+</td>
+<td>
+  <button class="editar" onclick="guardarEdicion(${row.id})">Guardar</button>
+  <button class="cerrar" onclick="cancelarEdicion()">Cancelar</button>
+</td>
             </tr>
           `;
         } else {
@@ -372,10 +377,11 @@
           return `
             <tr>
               <td>${row.expediente || ''}</td>
-              <td>${row.establecimiento || ''}</td>
-              <td>${row.observacion || ''}</td>
-              <td><span class="${clase}">${row.estado || ''}</span></td>
-              <td><button class="editar" onclick="editarFila(${row.id})">Editar</button></td>
+<td>${row.establecimiento || ''}</td>
+<td>${row.trámite || ''}</td>
+<td>${row.observacion || ''}</td>
+<td><span class="${clase}">${row.estado || ''}</span></td>
+<td><button class="editar" onclick="editarFila(${row.id})">Editar</button></td>
             </tr>
           `;
         }
@@ -415,12 +421,13 @@
 
     window.guardarEdicion = async function(id) {
       const expediente = document.getElementById('edit-expediente').value;
-      const establecimiento = document.getElementById('edit-establecimiento').value;
-      const observacion = document.getElementById('edit-observacion').value;
-      const estado = document.getElementById('edit-estado').value;
-      const { error } = await supabase.from('creaciones').update({
-        expediente, establecimiento, observacion, estado
-      }).eq('id', id);
+const establecimiento = document.getElementById('edit-establecimiento').value;
+const trámite = document.getElementById('edit-trámite').value;
+const observacion = document.getElementById('edit-observacion').value;
+const estado = document.getElementById('edit-estado').value;
+const { error } = await supabase.from('creaciones').update({
+  expediente, establecimiento, trámite, observacion, estado
+}).eq('id', id);
       filaEditando = null;
       cargarDatos();
     }
