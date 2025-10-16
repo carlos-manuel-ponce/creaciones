@@ -338,13 +338,6 @@
         return;
       }
       tbody.innerHTML = datosFiltrados.map(row => {
-    // Buscador
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('buscador').addEventListener('input', function() {
-        textoBusqueda = this.value;
-        renderizarTabla(datosGlobales);
-      });
-    });
         if (filaEditando === row.id) {
           // Fila en modo edición
           return `
@@ -446,6 +439,10 @@ const { error } = await supabase.from('creaciones').update({
           cerrarModalNuevo();
           cargarDatos();
         }
+      });
+      document.getElementById('buscador').addEventListener('input', function() {
+        textoBusqueda = this.value;
+        renderizarTabla(datosGlobales);
       });
     });
     cargarDatos();
