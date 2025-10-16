@@ -322,29 +322,31 @@
     let filaEditando = null;
     let textoBusqueda = '';
     function renderizarTabla(datos) {
-      // Filtrar por texto si hay búsqueda
-      let datosFiltrados = datos;
-      if (textoBusqueda.trim() !== '') {
-        const t = textoBusqueda.trim().toLowerCase();
-        datosFiltrados = datos.filter(row =>
-          (row.expediente || '').toLowerCase().includes(t) ||
-          (row.establecimiento || '').toLowerCase().includes(t) ||
-          (row.observacion || '').toLowerCase().includes(t)
-        );
-      }
-      const tbody = document.getElementById('tabla-principal-body');
-      if (!datosFiltrados || datosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan='5'>No hay datos en la tabla.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = datosFiltrados.map(row => {
-        if (filaEditando === row.id) {
-          // Fila en modo edición
-          return `
-            <tr>
-              <td><input value="${row.expediente || ''}" id="edit-expediente" style="width:100%"></td>
+  // Filtrar por texto si hay búsqueda
+  let datosFiltrados = datos;
+  if (textoBusqueda.trim() !== '') {
+    const t = textoBusqueda.trim().toLowerCase();
+    datosFiltrados = datos.filter(row =>
+      (row.expediente || '').toLowerCase().includes(t) ||
+      (row.establecimiento || '').toLowerCase().includes(t) ||
+      (row['trámite'] || row.tramite || '').toLowerCase().includes(t) ||
+      (row.observacion || '').toLowerCase().includes(t) ||
+      (row.estado || '').toLowerCase().includes(t)
+    );
+  }
+  const tbody = document.getElementById('tabla-principal-body');
+  if (!datosFiltrados || datosFiltrados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan='6'>No hay datos en la tabla.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = datosFiltrados.map(row => {
+    if (filaEditando === row.id) {
+      // Fila en modo edición
+      return `
+        <tr>
+          <td><input value="${row.expediente || ''}" id="edit-expediente" style="width:100%"></td>
 <td><input value="${row.establecimiento || ''}" id="edit-establecimiento" style="width:100%"></td>
-<td><input value="${row.trámite || ''}" id="edit-trámite" style="width:100%"></td>
+<td><input value="${row['trámite'] || row.tramite || ''}" id="edit-trámite" style="width:100%"></td>
 <td><input value="${row.observacion || ''}" id="edit-observacion" style="width:100%"></td>
 <td>
   <select id="edit-estado" style="width:100%">
@@ -358,28 +360,28 @@
   <button class="editar" onclick="guardarEdicion(${row.id})">Guardar</button>
   <button class="cerrar" onclick="cancelarEdicion()">Cancelar</button>
 </td>
-            </tr>
-          `;
-        } else {
-          let estado = (row.estado || '').toUpperCase();
-          let clase = '';
-          if (estado === 'PENDIENTE') clase = 'estado pendiente';
-          else if (estado === 'PROCESO' || estado === 'EN PROCESO') clase = 'estado proceso';
-          else if (estado === 'OBSERVADO') clase = 'estado observado';
-          else if (estado === 'FINALIZADO') clase = 'estado finalizado';
-          return `
-            <tr>
-              <td>${row.expediente || ''}</td>
+        </tr>
+      `;
+    } else {
+      let estado = (row.estado || '').toUpperCase();
+      let clase = '';
+      if (estado === 'PENDIENTE') clase = 'estado pendiente';
+      else if (estado === 'PROCESO' || estado === 'EN PROCESO') clase = 'estado proceso';
+      else if (estado === 'OBSERVADO') clase = 'estado observado';
+      else if (estado === 'FINALIZADO') clase = 'estado finalizado';
+      return `
+        <tr>
+          <td>${row.expediente || ''}</td>
 <td>${row.establecimiento || ''}</td>
-<td>${row.trámite || ''}</td>
+<td>${row['trámite'] || row.tramite || ''}</td>
 <td>${row.observacion || ''}</td>
 <td><span class="${clase}">${row.estado || ''}</span></td>
 <td><button class="editar" onclick="editarFila(${row.id})">Editar</button></td>
-            </tr>
-          `;
-        }
-      }).join('');
+        </tr>
+      `;
     }
+  }).join('');
+}
 
     function actualizarContadores(datos) {
       document.getElementById('contador-total').textContent = datos.length;
