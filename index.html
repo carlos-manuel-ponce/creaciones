@@ -229,6 +229,7 @@
           </svg>
         </span>
       </div>
+      
       <div>
         <label for="filtro-estado" style="font-weight: 600; color: var(--azul-institucional); margin-right: 0.5rem;">Filtrar por estado:</label>
         <select id="filtro-estado" style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--gris); font-size: 1rem;">
@@ -237,7 +238,8 @@
           <option value="PROCESO">En Proceso</option>
           <option value="OBSERVADO">Observados</option>
           <option value="FINALIZADO">Finalizados</option>
-        </select>
+     </select>
+        <button id="btn-documentos" style="background: #14532d; color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 700; font-size: 1rem; margin-left: 1rem; cursor: pointer; transition: background 0.3s;">DOCUMENTOS</button>
       </div>
     </div>
     <!-- Modal para nuevo expediente -->
@@ -297,6 +299,9 @@
       document.getElementById('modal-nuevo').style.display = 'flex';
       document.getElementById('nuevo-error').textContent = '';
       document.getElementById('form-nuevo-expediente').reset();
+      document.getElementById('btn-documentos').addEventListener('click', function() {
+  window.open('https://drive.google.com/drive/folders/1GihlO8R9lyuMMiwJC9rJyATGX0GAO2ZL?usp=drive_link', '_blank');
+});
     }
     function cerrarModalNuevo() {
       document.getElementById('modal-nuevo').style.display = 'none';
